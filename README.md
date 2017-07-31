@@ -1,7 +1,7 @@
 # 安装
 
 ```
-sudo wget http://openvpn.sh
+sudo wget https://github.com/q772890176/onekey-openvpn/blob/master/openvpn.sh
 sudo chmod +x openvpn.sh
 sudo bash openvpn.sh
 下载 /home/vpn.tar.gz
