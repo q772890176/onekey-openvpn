@@ -33,7 +33,7 @@ rm -rf /etc/openvpn/*
 rm -rf /home/vpn
 rm -rf /home/vpn.tar.gz
 yum update -y
-yum install gcc gcc-c++ lrzsz lzo openssl openssl-devel iptables pkcs11-helper pkcs11-helper-devel openssh-clients openvpn -y
+yum install gcc gcc-c++ lrzsz lzo openssl openssl-devel iptables pkcs11-helper pkcs11-helper-devel openssh-clients openvpn easy-rsa -y
 easy=`find / -name easy-rsa` && cp -R $easy /etc/openvpn/
 #if ! [ -d "$easy"];then
 #yum install easy-rsa -y
