@@ -12,4 +12,5 @@ sudo bash openvpn.sh
 
 ### 遇到[y/n]选项输入y
 
+### 检查下载的ovpn文件的ip是否正确
 

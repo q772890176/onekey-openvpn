@@ -54,7 +54,7 @@ server=`find / -name sample-config-files` && cp $server/server.conf /etc/openvpn
 
 server_conf='
 port 1194\n
-proto tcp\n
+proto udp\n
 dev tun\n
 ca ca.crt\n
 cert server.crt\n
@@ -78,7 +78,7 @@ log openvpn
 echo -e "$server_conf" > /etc/openvpn/server.conf
 
 
-
+sysctl -w net.ipv4.ip_forward=1
 sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g' /etc/sysctl.conf
 . ./vars
 ./clean-all
@@ -101,7 +101,7 @@ cp keys/{ca.crt,ca.key,client-name.crt,client-name.csr,client-name.key,server.cr
 fi
 ip=`ifconfig | awk -F'[ ]+|:' '/inet addr/{if($4!~/^192.168|^172.16|^10|^127|^0/) print $4}'`
 
-client_conf = "
+client_conf='
 client\n
 dev tun\n
 proto udp\n
@@ -118,7 +118,7 @@ comp-lzo\n
 verb 3\n
 route-method exe\n
 route-delay 2\n
-"
+'
 echo  -e "$client_conf" > /home/vpn/wmx.ovpn
 
 cd /home/
@@ -137,6 +137,7 @@ iptables -A INPUT -p tcp --dport 47 -j ACCEPT
 iptables -A INPUT -p tcp --dport 2009 -j ACCEPT
 iptables -A INPUT -p udp --dport 2009 -j ACCEPT
 iptables -A INPUT -p gre -j ACCEPT
+iptables -t nat -A POSTROUTING -j MASQUERADE 
 iptables -t nat -A POSTROUTING -s 192.168.10.0/24 -j SNAT --to-source $ip
 iptables -t nat -A POSTROUTING -s 10.8.0.20/24 -j SNAT --to-source $ip
 iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -j SNAT --to-source $ip
