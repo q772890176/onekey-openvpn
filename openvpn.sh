@@ -23,7 +23,7 @@ yum -y install lzo
 rpm -ivh http://mirrors.sohu.com/fedora-epel/6/x86_64/epel-release-6-8.noarch.rpm
 sed -i 's/^mirrorlist=https/mirrorlist=http/' /etc/yum.repos.d/epel.repo
 
-wget ftp://rpmfind.net/linux/dag/redhat/el7/en/x86_64/dag/RPMS/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
+wget http://wangmingxuan.cn/download/rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
 rpm -iv rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
 rm -rf rpmforge-release-0.5.3-1.el7.rf.x86_64.rpm
 
@@ -136,4 +136,3 @@ rm -rf *.rpm
 yum clean all
 
 echo '****  下载/home/vpn.tar.gz      ****';
-
