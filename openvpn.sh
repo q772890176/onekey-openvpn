@@ -51,15 +51,34 @@ sed -i 's/export KEY_ORG="Fort-Funston"/export KEY_ORG="OpenVPN"/g' vars
 sed -i 's/export KEY_EMAIL="me@myhost.mydomain"/export KEY_EMAIL="root@foxmail.com"/g' vars
 sed -i 's/export KEY_EMAIL=mail@host.domain/export KEY_EMAIL=root@foxmail.com/g' vars
 server=`find / -name sample-config-files` && cp $server/server.conf /etc/openvpn/
-sed -i 's/;push "route 192.168.10.0 255.255.255.0"/push "route 0.0.0.0 0.0.0.0"/g' /etc/openvpn/server.conf
-sed -i 's/;push "dhcp-option DNS 208.67.222.222"/push "dhcp-option DNS 114.114.114.114"/g' /etc/openvpn/server.conf
-sed -i 's/;push "dhcp-option DNS 208.67.220.220"/push "dhcp-option DNS 8.8.4.4"/g' /etc/openvpn/server.conf
-sed -i 's/;client-to-client/client-to-client/g' /etc/openvpn/server.conf
-sed -i 's/;push "redirect-gateway def1 bypass-dhcp"/push "redirect-gateway def1 bypass-dhcp"/g' /etc/openvpn/server.conf
-sed -i 's/;comp-lzo/comp-lzo/g' /etc/openvpn/server.conf
-sed -i 's/tls-auth ta.key 0/;tls-auth ta.key 0/g' /etc/openvpn/server.conf
-sed -i 's/cipher AES-256-CBC/;cipher AES-256-CBC/g' /etc/openvpn/server.conf
-sed -i 's/explicit-exit-notify 1/;explicit-exit-notify 1/g' /etc/openvpn/server.conf
+
+server_conf='
+port 1194\n
+proto tcp\n
+dev tun\n
+ca ca.crt\n
+cert server.crt\n
+key server.key  # This file should be kept secret\n
+dh dh2048.pem\n
+server 10.8.0.0 255.255.255.0\n
+ifconfig-pool-persist ipp.txt\n
+push "route 0.0.0.0 0.0.0.0"\n
+push "redirect-gateway def1 bypass-dhcp"\n
+push "dhcp-option DNS 114.114.114.114"\n
+push "dhcp-option DNS 8.8.8.8"\n
+client-to-client\n
+keepalive 10 120\n
+comp-lzo\n
+persist-key\n
+persist-tun\n
+status openvpn-status.log\n
+verb 3
+log openvpn
+'
+echo -e "$server_conf" > /etc/openvpn/server.conf
+
+
+
 sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/g' /etc/sysctl.conf
 . ./vars
 ./clean-all
@@ -81,24 +100,26 @@ cp keys/{ca.crt,ca.key,client-name.crt,client-name.csr,client-name.key,server.cr
 cp keys/{ca.crt,ca.key,client-name.crt,client-name.csr,client-name.key,server.crt,server.key,dh2048.pem,client-name.pem} /home/vpn/
 fi
 ip=`ifconfig | awk -F'[ ]+|:' '/inet addr/{if($4!~/^192.168|^172.16|^10|^127|^0/) print $4}'`
-echo -e "client\n" > /home/vpn/server.ovpn
-echo -e "dev tun\n" >> /home/vpn/server.ovpn
-echo -e "proto udp\n" >> /home/vpn/server.ovpn
-echo -n "remote " >> /home/vpn/server.ovpn
-echo -n $ip >> /home/vpn/server.ovpn
-echo -e " 1194\n" >> /home/vpn/server.ovpn
-echo -e "resolv-retry infinite\n" >> /home/vpn/server.ovpn
-echo -e "nobind\n" >> /home/vpn/server.ovpn
-echo -e "persist-key\n" >> /home/vpn/server.ovpn
-echo -e "persist-tun\n" >> /home/vpn/server.ovpn
-echo -e "ca ca.crt\n" >> /home/vpn/server.ovpn
-echo -e "cert client-name.crt\n" >> /home/vpn/server.ovpn
-echo -e "key client-name.key\n" >> /home/vpn/server.ovpn
-echo -e "ns-cert-type server\n" >> /home/vpn/server.ovpn
-echo -e "comp-lzo\n" >> /home/vpn/server.ovpn
-echo -e "verb 3\n" >> /home/vpn/server.ovpn
-echo -e "route-method exe\n" >> /home/vpn/server.ovpn
-echo -e "route-delay 2\n" >> /home/vpn/server.ovpn
+
+client_conf = "
+client\n
+dev tun\n
+proto udp\n
+remote $ip 1194\n
+resolv-retry infinite\n
+nobind\n
+persist-key\n
+persist-tun\n
+ca ca.crt\n
+cert client-name.crt\n
+key client-name.key\n
+ns-cert-type server\n
+comp-lzo\n
+verb 3\n
+route-method exe\n
+route-delay 2\n
+"
+echo  -e "$client_conf" > /home/vpn/wmx.ovpn
 
 cd /home/
 tar -zcvf vpn.tar.gz vpn/*
@@ -135,4 +156,4 @@ rp=`rpm -qa |grep rpmforge` && yum -q remove $rp -y
 rm -rf *.rpm
 yum clean all
 
-echo '****  下载/home/vpn.tar.gz      ****';
+echo '****  /home/vpn.tar.gz      ****';

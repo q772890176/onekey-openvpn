@@ -1,7 +1,7 @@
 # 安装
 
 ```
-sudo wget http:///wangmingxuan.cn/download/openvpn.sh
+sudo wget http://wangmingxuan.cn/download/openvpn.sh
 sudo chmod +x openvpn.sh
 sudo bash openvpn.sh
 下载 /home/vpn.tar.gz
